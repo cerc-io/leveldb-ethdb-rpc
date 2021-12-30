@@ -25,7 +25,6 @@ import (
 	"github.com/ethereum/go-ethereum/p2p/netutil"
 	"github.com/ethereum/go-ethereum/rpc"
 	log "github.com/sirupsen/logrus"
-	"github.com/vulcanize/ipld-eth-server/pkg/prom"
 )
 
 var (
@@ -66,7 +65,6 @@ func ipcServe(srv *rpc.Server, listener net.Listener) {
 			continue
 		}
 		log.WithField("addr", conn.RemoteAddr()).Trace("accepted ipc connection")
-		go prom.IPCMiddleware(srv, conn)
 	}
 }
 

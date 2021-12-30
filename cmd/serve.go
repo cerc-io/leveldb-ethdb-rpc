@@ -27,6 +27,7 @@ import (
 
 	"github.com/vulcanize/leveldb-ethdb-rpc/pkg"
 	srpc "github.com/vulcanize/leveldb-ethdb-rpc/pkg/rpc"
+	"github.com/vulcanize/leveldb-ethdb-rpc/version"
 )
 
 var (
@@ -47,7 +48,7 @@ var serveCmd = &cobra.Command{
 }
 
 func serve() {
-	logWithCommand.Infof("running ipld-eth-server version: %s", v.VersionWithMeta)
+	logWithCommand.Infof("running ipld-eth-server version: %s", version.VersionWithMeta)
 
 	wg := new(sync.WaitGroup)
 	logWithCommand.Debug("loading server configuration variables")
