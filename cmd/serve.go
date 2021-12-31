@@ -24,8 +24,9 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
-	"github.com/vulcanize/leveldb-ethdb-rpc/pkg"
+	leveldb_ethdb_rpc "github.com/vulcanize/leveldb-ethdb-rpc/pkg"
 	srpc "github.com/vulcanize/leveldb-ethdb-rpc/pkg/rpc"
 	"github.com/vulcanize/leveldb-ethdb-rpc/version"
 )
@@ -52,13 +53,13 @@ func serve() {
 
 	wg := new(sync.WaitGroup)
 	logWithCommand.Debug("loading server configuration variables")
-	serverConfig, err := pkg.NewConfig()
+	serverConfig, err := leveldb_ethdb_rpc.NewConfig()
 	if err != nil {
 		logWithCommand.Fatal(err)
 	}
 	logWithCommand.Infof("server config: %+v", serverConfig)
 	logWithCommand.Debug("initializing new server service")
-	server, err := pkg.NewServer(serverConfig)
+	server, err := leveldb_ethdb_rpc.NewServer(serverConfig)
 	if err != nil {
 		logWithCommand.Fatal(err)
 	}
@@ -76,7 +77,7 @@ func serve() {
 	wg.Wait()
 }
 
-func startServers(server pkg.Server, settings pkg.Config) error {
+func startServers(server leveldb_ethdb_rpc.Server, settings *leveldb_ethdb_rpc.Config) error {
 	if settings.IPCEnabled {
 		logWithCommand.Info("starting up IPC server")
 		_, _, err := srpc.StartIPCEndpoint(settings.IPCEndpoint, server.APIs())
@@ -103,13 +104,25 @@ func startServers(server pkg.Server, settings pkg.Config) error {
 func init() {
 	rootCmd.AddCommand(serveCmd)
 
-	// Here you will define your flags and configuration settings.
+	// CLI flags
+	serveCmd.PersistentFlags().Bool("ipc-enabled", false, "turn on ipc server")
+	serveCmd.PersistentFlags().String("ipc-path", "", "ipc server endpoint")
+	serveCmd.PersistentFlags().Bool("http-enabled", true, "turn on http server; on by default")
+	serveCmd.PersistentFlags().String("http-path", "127.0.0.1:8500", "http server endpoint; default = 127.0.0.1:8545")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// serveCmd.PersistentFlags().String("foo", "", "A help for foo")
+	serveCmd.PersistentFlags().String("leveldb-path", "", "leveldb filesystem path")
+	serveCmd.PersistentFlags().Int("leveldb-cache-size", 0, "leveldb cache size")
+	serveCmd.PersistentFlags().String("leveldb-ancient-path", "", "filesystem path to freezer")
+	serveCmd.PersistentFlags().String("leveldb-namespace", "eth/db/chaindata/", "leveldb namespace")
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// serveCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// toml bindings
+	viper.BindPFlag(leveldb_ethdb_rpc.TOML_IPC_ENABLED, serveCmd.PersistentFlags().Lookup("ipc-enabled"))
+	viper.BindPFlag(leveldb_ethdb_rpc.TOML_IPC_ENDPOINT, serveCmd.PersistentFlags().Lookup("ipc-path"))
+	viper.BindPFlag(leveldb_ethdb_rpc.TOML_HTTP_ENABLED, serveCmd.PersistentFlags().Lookup("http-enabled"))
+	viper.BindPFlag(leveldb_ethdb_rpc.TOML_HTTP_ENDPOINT, serveCmd.PersistentFlags().Lookup("http-path"))
+
+	viper.BindPFlag(leveldb_ethdb_rpc.TOML_LEVELDB_PATH, serveCmd.PersistentFlags().Lookup("leveldb-path"))
+	viper.BindPFlag(leveldb_ethdb_rpc.TOML_LEVELDB_CACHE_SIZE, serveCmd.PersistentFlags().Lookup("leveldb-cache-size"))
+	viper.BindPFlag(leveldb_ethdb_rpc.TOML_LEVELDB_ANCIENT_PATH, serveCmd.PersistentFlags().Lookup("leveldb-ancient-path"))
+	viper.BindPFlag(leveldb_ethdb_rpc.TOML_LEVELDB_NAMESPACE, serveCmd.PersistentFlags().Lookup("leveldb-namespace"))
 }

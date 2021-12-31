@@ -20,8 +20,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
+	leveldb_ethdb_rpc "github.com/vulcanize/leveldb-ethdb-rpc/pkg"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
@@ -29,59 +31,64 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "leveldb-ethdb-rpc",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Use:              "leveldb-ethdb-rpc",
+	PersistentPreRun: initFuncs,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
+	log.Info("----- Starting IPFS blockchain watcher -----")
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatal(err)
+	}
 }
 
-func init() {
-	cobra.OnInitialize(initConfig)
+func initFuncs(cmd *cobra.Command, args []string) {
+	viper.BindEnv(leveldb_ethdb_rpc.TOML_LOGRUS_FILE, leveldb_ethdb_rpc.LOGRUS_FILE)
+	logfile := viper.GetString(leveldb_ethdb_rpc.TOML_LOGRUS_FILE)
+	if logfile != "" {
+		file, err := os.OpenFile(logfile,
+			os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err == nil {
+			log.Infof("Directing output to %s", logfile)
+			log.SetOutput(file)
+		} else {
+			log.SetOutput(os.Stdout)
+			log.Info("Failed to log to file, using default stdout")
+		}
+	} else {
+		log.SetOutput(os.Stdout)
+	}
+	if err := logLevel(); err != nil {
+		log.Fatal("Could not set log level: ", err)
+	}
+}
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.leveldb-ethdb-rpc.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func logLevel() error {
+	viper.BindEnv(leveldb_ethdb_rpc.TOML_LOGRUS_LEVEL, leveldb_ethdb_rpc.LOGRUS_LEVEL)
+	lvl, err := log.ParseLevel(viper.GetString(leveldb_ethdb_rpc.TOML_LOGRUS_LEVEL))
+	if err != nil {
+		return err
+	}
+	log.SetLevel(lvl)
+	if lvl > log.InfoLevel {
+		log.SetReportCaller(true)
+	}
+	log.Info("Log level set to ", lvl.String())
+	return nil
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if cfgFile != "" {
-		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
+		if err := viper.ReadInConfig(); err == nil {
+			log.Printf("Using config file: %s", viper.ConfigFileUsed())
+		} else {
+			log.Fatal(fmt.Sprintf("Couldn't read config file: %s", err.Error()))
+		}
 	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".leveldb-ethdb-rpc" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".leveldb-ethdb-rpc")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		log.Warn("No config file passed with --config flag")
 	}
 }

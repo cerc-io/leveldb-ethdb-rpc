@@ -14,16 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package pkg
+package leveldb_ethdb_rpc
 
 import (
 	"sync"
 
-	log "github.com/sirupsen/logrus"
-
 	ethnode "github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/rpc"
+	log "github.com/sirupsen/logrus"
 )
 
 // Server is the top level interface for exposing a remote RPC wrapper around levelDB ethdb.Database
@@ -42,7 +41,7 @@ type Service struct {
 }
 
 // NewServer creates a new Server using an underlying Service struct
-func NewServer(conf Config) (Server, error) {
+func NewServer(conf *Config) (Server, error) {
 	sap := new(Service)
 	sap.quitChan = make(chan struct{})
 	var err error

@@ -1,0 +1,13 @@
+[log]
+    level = "info" # $LOGRUS_LEVEL
+    file = "" # $LOGRUS_FILE
+
+[leveldb]
+    ipcEnabled = false # $IPC_ENABLED
+    ipcPath = "~/.vulcanize/vulcanize.ipc" # $IPC_PATH
+    httpEnabled = true # $HTTP_ENABLED
+    httpPath = "127.0.0.1:8082" # $HTTP_PATH
+    path = "/Users/user/Library/Ethereum/geth/chaindata" # $LEVELDB_PATH
+    ancient = "/Users/user/Library/Ethereum/geth/chaindata/ancient" # $LEVELDB_ANCIENT_PATH
+    cacheSize = 1024 # $LEVELDB_CACHE_SIZE
+    namespace = "eth/db/chaindata/" # $LEVELDB_NAMESPACE

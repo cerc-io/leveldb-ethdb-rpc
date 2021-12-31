@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package pkg
+package leveldb_ethdb_rpc
 
 import (
 	"github.com/ethereum/go-ethereum/core/rawdb"
@@ -25,12 +25,12 @@ import (
 var _ ethdb.Database = &LevelDBBackend{}
 
 // NewLevelDBBackend creates a new levelDB RPC server backend
-func NewLevelDBBackend(conf Config) (*LevelDBBackend, error) {
-	db, err := leveldb.New(conf.File, conf.Cache, conf.Handles, conf.Namespace, conf.Readonly)
+func NewLevelDBBackend(conf *Config) (*LevelDBBackend, error) {
+	db, err := leveldb.New(conf.FilePath, conf.Cache, conf.Handles, conf.Namespace, true)
 	if err != nil {
 		return nil, err
 	}
-	frdb, err := rawdb.NewDatabaseWithFreezer(db, conf.Freezer, conf.Namespace, conf.Readonly)
+	frdb, err := rawdb.NewDatabaseWithFreezer(db, conf.FreezerPath, conf.Namespace, true)
 	if err != nil {
 		db.Close()
 		return nil, err
@@ -62,8 +62,12 @@ func (s *LevelDBBackend) Ancient(kind string, number uint64) ([]byte, error) {
 	return s.ethDB.Ancient(kind, number)
 }
 
-func (s *LevelDBBackend) ReadAncients(kind string, start, count, maxBytes uint64) ([][]byte, error) {
-	return s.ethDB.ReadAncients(kind, start, count, maxBytes)
+func (s *LevelDBBackend) AncientRange(kind string, start, count, maxBytes uint64) ([][]byte, error) {
+	return s.ethDB.AncientRange(kind, start, count, maxBytes)
+}
+
+func (s *LevelDBBackend) ReadAncients(fn func(ethdb.AncientReader) error) error {
+	return s.ethDB.ReadAncients(fn)
 }
 
 func (s *LevelDBBackend) Ancients() (uint64, error) {
@@ -74,11 +78,11 @@ func (s *LevelDBBackend) AncientSize(kind string) (uint64, error) {
 	return s.ethDB.AncientSize(kind)
 }
 
-func (s *LevelDBBackend) Put(key []byte, value []byte) error {
+func (s *LevelDBBackend) Put(_ []byte, _ []byte) error {
 	return errWriteNotAllowed
 }
 
-func (s *LevelDBBackend) Delete(key []byte) error {
+func (s *LevelDBBackend) Delete(_ []byte) error {
 	return errWriteNotAllowed
 }
 
@@ -98,7 +102,7 @@ func (s *LevelDBBackend) NewBatch() ethdb.Batch {
 	return nil
 }
 
-func (s *LevelDBBackend) NewIterator(prefix []byte, start []byte) ethdb.Iterator {
+func (s *LevelDBBackend) NewIterator(_ []byte, _ []byte) ethdb.Iterator {
 	return nil
 }
 
@@ -106,7 +110,7 @@ func (s *LevelDBBackend) Stat(property string) (string, error) {
 	return s.ethDB.Stat(property)
 }
 
-func (s *LevelDBBackend) Compact(start []byte, limit []byte) error {
+func (s *LevelDBBackend) Compact(_ []byte, _ []byte) error {
 	return errWriteNotAllowed
 }
 
