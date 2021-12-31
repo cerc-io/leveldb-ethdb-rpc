@@ -14,11 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package pkg
+package leveldb_ethdb_rpc
 
 import (
 	"context"
 	"errors"
+
+	"github.com/ethereum/go-ethereum/ethdb"
 )
 
 // APIName is the namespace used for the state diffing service API
@@ -55,8 +57,12 @@ func (s *PublicLevelDBAPI) Ancient(ctx context.Context, kind string, number uint
 	return s.b.Ancient(kind, number)
 }
 
-func (s *PublicLevelDBAPI) ReadAncients(ctx context.Context, kind string, start, count, maxBytes uint64) ([][]byte, error) {
-	return s.b.ReadAncients(kind, start, count, maxBytes)
+func (s *PublicLevelDBAPI) AncientRange(ctx context.Context, kind string, start, count, maxBytes uint64) ([][]byte, error) {
+	return s.b.AncientRange(kind, start, count, maxBytes)
+}
+
+func (s *PublicLevelDBAPI) ReadAncients(fn func(ethdb.AncientReader) error) error {
+	return s.b.ReadAncients(fn)
 }
 
 func (s *PublicLevelDBAPI) Ancients(ctx context.Context) (uint64, error) {
