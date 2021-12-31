@@ -38,7 +38,7 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	log.Info("----- Starting IPFS blockchain watcher -----")
+	log.Info("----- Starting levelDB ethdb RPC server -----")
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
