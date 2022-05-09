@@ -74,6 +74,10 @@ func (s *LevelDBBackend) Ancients() (uint64, error) {
 	return s.ethDB.Ancients()
 }
 
+func (s *LevelDBBackend) Tail() (uint64, error) {
+	return s.ethDB.Tail()
+}
+
 func (s *LevelDBBackend) AncientSize(kind string) (uint64, error) {
 	return s.ethDB.AncientSize(kind)
 }
@@ -94,11 +98,23 @@ func (s *LevelDBBackend) TruncateAncients(n uint64) error {
 	return errWriteNotAllowed
 }
 
+func (s *LevelDBBackend) TruncateHead(n uint64) error {
+	return errWriteNotAllowed
+}
+
+func (s *LevelDBBackend) TruncateTail(n uint64) error {
+	return errWriteNotAllowed
+}
+
 func (s *LevelDBBackend) Sync() error {
 	return errWriteNotAllowed
 }
 
 func (s *LevelDBBackend) NewBatch() ethdb.Batch {
+	return nil
+}
+
+func (d *LevelDBBackend) NewBatchWithSize(size int) ethdb.Batch {
 	return nil
 }
 
@@ -116,4 +132,12 @@ func (s *LevelDBBackend) Compact(_ []byte, _ []byte) error {
 
 func (s *LevelDBBackend) Close() error {
 	return errWriteNotAllowed
+}
+
+func (s *LevelDBBackend) MigrateTable(string, func([]byte) ([]byte, error)) error {
+	return errWriteNotAllowed
+}
+
+func (s *LevelDBBackend) NewSnapshot() (ethdb.Snapshot, error) {
+	return s.ethDB.NewSnapshot()
 }
