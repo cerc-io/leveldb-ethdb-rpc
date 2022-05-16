@@ -24,14 +24,14 @@ import (
 
 var errNotSupported = errors.New("this operation is not supported")
 
-var _ ethdb.Database = &Database{}
+var _ ethdb.Database = &DatabaseClient{}
 
-// Type that satisfies the ethdb.Database using a leveldb-ethdb-rpc client
-type Database struct {
+// Type that satisfies the ethdb.DatabaseClient using a leveldb-ethdb-rpc client
+type DatabaseClient struct {
 	client *rpc.Client
 }
 
-func (d *Database) ModifyAncients(f func(ethdb.AncientWriteOp) error) (int64, error) {
+func (d *DatabaseClient) ModifyAncients(f func(ethdb.AncientWriteOp) error) (int64, error) {
 	return 0, errNotSupported
 }
 
@@ -42,7 +42,7 @@ func NewDatabaseClient(url string) (ethdb.Database, error) {
 		return nil, err
 	}
 
-	database := Database{
+	database := DatabaseClient{
 		client: rpcClient,
 	}
 
@@ -51,7 +51,7 @@ func NewDatabaseClient(url string) (ethdb.Database, error) {
 
 // Has satisfies the ethdb.KeyValueReader interface
 // Has retrieves if a key is present in the key-value data store
-func (d *Database) Has(key []byte) (bool, error) {
+func (d *DatabaseClient) Has(key []byte) (bool, error) {
 	var resp bool
 	err := d.client.Call(&resp, "leveldb_has", key)
 	if err != nil {
@@ -63,7 +63,7 @@ func (d *Database) Has(key []byte) (bool, error) {
 
 // Get satisfies the ethdb.KeyValueReader interface
 // Get retrieves the given key if it's present in the key-value data store
-func (d *Database) Get(key []byte) ([]byte, error) {
+func (d *DatabaseClient) Get(key []byte) ([]byte, error) {
 	var resp []byte
 	err := d.client.Call(&resp, "leveldb_get", key)
 	if err != nil {
@@ -76,38 +76,44 @@ func (d *Database) Get(key []byte) ([]byte, error) {
 // Put satisfies the ethdb.KeyValueWriter interface
 // Put inserts the given value into the key-value data store
 // Key is expected to be the keccak256 hash of value
-func (d *Database) Put(key []byte, value []byte) error {
+func (d *DatabaseClient) Put(key []byte, value []byte) error {
 	return errNotSupported
 }
 
 // Delete satisfies the ethdb.KeyValueWriter interface
 // Delete removes the key from the key-value data store
-func (d *Database) Delete(key []byte) error {
+func (d *DatabaseClient) Delete(key []byte) error {
 	return errNotSupported
 }
 
 // Stat satisfies the ethdb.Stater interface
 // Stat returns a particular internal stat of the database
-func (d *Database) Stat(property string) (string, error) {
-	return "", errNotSupported
+func (d *DatabaseClient) Stat(property string) (string, error) {
+	var resp string
+	err := d.client.Call(&resp, "leveldb_stat", property)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, nil
 }
 
 // Compact satisfies the ethdb.Compacter interface
 // Compact flattens the underlying data store for the given key range
-func (d *Database) Compact(start []byte, limit []byte) error {
+func (d *DatabaseClient) Compact(start []byte, limit []byte) error {
 	return errNotSupported
 }
 
 // NewBatch satisfies the ethdb.Batcher interface
 // NewBatch creates a write-only database that buffers changes to its host db
 // until a final write is called
-func (d *Database) NewBatch() ethdb.Batch {
+func (d *DatabaseClient) NewBatch() ethdb.Batch {
 	return nil
 }
 
 // NewBatchWithSize satisfies the ethdb.Batcher interface.
 // NewBatchWithSize creates a write-only database batch with pre-allocated buffer.
-func (d *Database) NewBatchWithSize(size int) ethdb.Batch {
+func (d *DatabaseClient) NewBatchWithSize(size int) ethdb.Batch {
 	return nil
 }
 
@@ -118,44 +124,68 @@ func (d *Database) NewBatchWithSize(size int) ethdb.Batch {
 //
 // Note: This method assumes that the prefix is NOT part of the start, so there's
 // no need for the caller to prepend the prefix to the start
-func (d *Database) NewIterator(prefix []byte, start []byte) ethdb.Iterator {
+func (d *DatabaseClient) NewIterator(prefix []byte, start []byte) ethdb.Iterator {
 	return nil
 }
 
 // Close satisfies the io.Closer interface
 // Close closes the db connection
-func (d *Database) Close() error {
+func (d *DatabaseClient) Close() error {
 	return errNotSupported
 }
 
 // HasAncient satisfies the ethdb.AncientReader interface
 // HasAncient returns an indicator whether the specified data exists in the ancient store
-func (d *Database) HasAncient(kind string, number uint64) (bool, error) {
-	return false, errNotSupported
+func (d *DatabaseClient) HasAncient(kind string, number uint64) (bool, error) {
+	var resp bool
+	err := d.client.Call(&resp, "leveldb_hasAncient", kind, number)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, nil
 }
 
 // Ancient satisfies the ethdb.AncientReader interface
 // Ancient retrieves an ancient binary blob from the append-only immutable files
-func (d *Database) Ancient(kind string, number uint64) ([]byte, error) {
-	return nil, errNotSupported
+func (d *DatabaseClient) Ancient(kind string, number uint64) ([]byte, error) {
+	var resp []byte
+	err := d.client.Call(&resp, "leveldb_ancient", kind, number)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, nil
 }
 
 // Ancients satisfies the ethdb.AncientReader interface
 // Ancients returns the ancient item numbers in the ancient store
-func (d *Database) Ancients() (uint64, error) {
-	return 0, errNotSupported
+func (d *DatabaseClient) Ancients() (uint64, error) {
+	var resp uint64
+	err := d.client.Call(&resp, "leveldb_ancients")
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, nil
 }
 
 // Tail satisfies the ethdb.AncientReader interface.
 // Tail returns the number of first stored item in the freezer.
-func (d *Database) Tail() (uint64, error) {
+func (d *DatabaseClient) Tail() (uint64, error) {
 	return 0, errNotSupported
 }
 
 // AncientSize satisfies the ethdb.AncientReader interface
 // AncientSize returns the ancient size of the specified category
-func (d *Database) AncientSize(kind string) (uint64, error) {
-	return 0, errNotSupported
+func (d *DatabaseClient) AncientSize(kind string) (uint64, error) {
+	var resp uint64
+	err := d.client.Call(&resp, "leveldb_ancientSize")
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, nil
 }
 
 // AncientRange retrieves all the items in a range, starting from the index 'start'.
@@ -163,41 +193,47 @@ func (d *Database) AncientSize(kind string) (uint64, error) {
 //  - at most 'count' items,
 //  - at least 1 item (even if exceeding the maxBytes), but will otherwise
 //   return as many items as fit into maxBytes.
-func (d *Database) AncientRange(kind string, start, count, maxBytes uint64) ([][]byte, error) {
-	return nil, errNotSupported
+func (d *DatabaseClient) AncientRange(kind string, start, count, maxBytes uint64) ([][]byte, error) {
+	var resp [][]byte
+	err := d.client.Call(&resp, "leveldb_ancientRange", kind, start, count, maxBytes)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, nil
 }
 
 // ReadAncients applies the provided AncientReader function
-func (d *Database) ReadAncients(fn func(ethdb.AncientReader) error) (err error) {
+func (d *DatabaseClient) ReadAncients(fn func(ethdb.AncientReader) error) (err error) {
 	return fn(d)
 }
 
 // TruncateHead satisfies the ethdb.AncientWriter interface.
 // TruncateHead discards all but the first n ancient data from the ancient store.
-func (d *Database) TruncateHead(n uint64) error {
+func (d *DatabaseClient) TruncateHead(n uint64) error {
 	return errNotSupported
 }
 
 // TruncateTail satisfies the ethdb.AncientWriter interface.
 // TruncateTail discards the first n ancient data from the ancient store.
-func (d *Database) TruncateTail(n uint64) error {
+func (d *DatabaseClient) TruncateTail(n uint64) error {
 	return errNotSupported
 }
 
 // Sync satisfies the ethdb.AncientWriter interface
 // Sync flushes all in-memory ancient store data to disk
-func (d *Database) Sync() error {
+func (d *DatabaseClient) Sync() error {
 	return errNotSupported
 }
 
 // MigrateTable satisfies the ethdb.AncientWriter interface.
 // MigrateTable processes and migrates entries of a given table to a new format.
-func (d *Database) MigrateTable(string, func([]byte) ([]byte, error)) error {
+func (d *DatabaseClient) MigrateTable(string, func([]byte) ([]byte, error)) error {
 	return errNotSupported
 }
 
 // NewSnapshot satisfies the ethdb.Snapshotter interface.
 // NewSnapshot creates a database snapshot based on the current state.
-func (d *Database) NewSnapshot() (ethdb.Snapshot, error) {
+func (d *DatabaseClient) NewSnapshot() (ethdb.Snapshot, error) {
 	return nil, errNotSupported
 }
