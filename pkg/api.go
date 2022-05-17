@@ -19,8 +19,6 @@ package leveldb_ethdb_rpc
 import (
 	"context"
 	"errors"
-
-	"github.com/ethereum/go-ethereum/ethdb"
 )
 
 // APIName is the namespace used for the state diffing service API
@@ -59,10 +57,6 @@ func (s *PublicLevelDBAPI) Ancient(ctx context.Context, kind string, number uint
 
 func (s *PublicLevelDBAPI) AncientRange(ctx context.Context, kind string, start, count, maxBytes uint64) ([][]byte, error) {
 	return s.b.AncientRange(kind, start, count, maxBytes)
-}
-
-func (s *PublicLevelDBAPI) ReadAncients(fn func(ethdb.AncientReader) error) error {
-	return s.b.ReadAncients(fn)
 }
 
 func (s *PublicLevelDBAPI) Ancients(ctx context.Context) (uint64, error) {
