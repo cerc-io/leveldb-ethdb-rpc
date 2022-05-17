@@ -31,10 +31,6 @@ type DatabaseClient struct {
 	client *rpc.Client
 }
 
-func (d *DatabaseClient) ModifyAncients(f func(ethdb.AncientWriteOp) error) (int64, error) {
-	return 0, errNotSupported
-}
-
 // NewDatabase returns a ethdb.Database interface
 func NewDatabaseClient(url string) (ethdb.Database, error) {
 	rpcClient, err := rpc.Dial(url)
@@ -206,6 +202,12 @@ func (d *DatabaseClient) AncientRange(kind string, start, count, maxBytes uint64
 // ReadAncients applies the provided AncientReader function
 func (d *DatabaseClient) ReadAncients(fn func(ethdb.AncientReader) error) (err error) {
 	return fn(d)
+}
+
+// ModifyAncients satisfies the ethdb.AncientWriter interface.
+// ModifyAncients runs a write operation on the ancient store.
+func (d *DatabaseClient) ModifyAncients(f func(ethdb.AncientWriteOp) error) (int64, error) {
+	return 0, errNotSupported
 }
 
 // TruncateHead satisfies the ethdb.AncientWriter interface.
