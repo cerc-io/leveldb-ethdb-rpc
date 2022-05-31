@@ -17,11 +17,14 @@
 package leveldb_ethdb_rpc
 
 import (
+	"errors"
+
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/ethdb/leveldb"
 )
 
+var errNotSupported = errors.New("this operation is not supported")
 var _ ethdb.Database = &LevelDBBackend{}
 
 // NewLevelDBBackend creates a new levelDB RPC server backend
@@ -66,7 +69,7 @@ func (s *LevelDBBackend) AncientRange(kind string, start, count, maxBytes uint64
 	return s.ethDB.AncientRange(kind, start, count, maxBytes)
 }
 
-func (s *LevelDBBackend) ReadAncients(fn func(ethdb.AncientReader) error) error {
+func (s *LevelDBBackend) ReadAncients(fn func(ethdb.AncientReaderOp) error) error {
 	return s.ethDB.ReadAncients(fn)
 }
 
@@ -140,4 +143,9 @@ func (s *LevelDBBackend) MigrateTable(string, func([]byte) ([]byte, error)) erro
 
 func (s *LevelDBBackend) NewSnapshot() (ethdb.Snapshot, error) {
 	return s.ethDB.NewSnapshot()
+}
+
+// AncientDatadir returns an error as we don't have a backing chain freezer.
+func (d *LevelDBBackend) AncientDatadir() (string, error) {
+	return "", errNotSupported
 }
