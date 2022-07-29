@@ -3,7 +3,7 @@ module github.com/vulcanize/leveldb-ethdb-rpc
 go 1.18
 
 require (
-	github.com/ethereum/go-ethereum v1.10.20
+	github.com/ethereum/go-ethereum v1.10.21
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.10.1
