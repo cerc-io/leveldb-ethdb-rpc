@@ -3,7 +3,7 @@ module github.com/vulcanize/leveldb-ethdb-rpc
 go 1.18
 
 require (
-	github.com/ethereum/go-ethereum v1.10.25
+	github.com/ethereum/go-ethereum v1.10.26
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.10.1
@@ -127,4 +127,4 @@ require (
 	lukechampine.com/blake3 v1.1.6 // indirect
 )
 
-replace github.com/ethereum/go-ethereum v1.10.25 => github.com/vulcanize/go-ethereum v1.10.25-statediff-4.2.1-alpha
+replace github.com/ethereum/go-ethereum v1.10.26 => github.com/cerc-io/go-ethereum v1.10.26-statediff-4.2.2-alpha
