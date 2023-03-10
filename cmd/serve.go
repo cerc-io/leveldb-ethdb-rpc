@@ -26,9 +26,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	leveldb_ethdb_rpc "github.com/vulcanize/leveldb-ethdb-rpc/pkg"
-	srpc "github.com/vulcanize/leveldb-ethdb-rpc/pkg/rpc"
-	"github.com/vulcanize/leveldb-ethdb-rpc/version"
+	leveldb_ethdb_rpc "github.com/cerc-io/leveldb-ethdb-rpc/pkg"
+	srpc "github.com/cerc-io/leveldb-ethdb-rpc/pkg/rpc"
+	"github.com/cerc-io/leveldb-ethdb-rpc/version"
 )
 
 var (

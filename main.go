@@ -16,7 +16,7 @@
 
 package main
 
-import "github.com/vulcanize/leveldb-ethdb-rpc/cmd"
+import "github.com/cerc-io/leveldb-ethdb-rpc/cmd"
 
 func main() {
 	cmd.Execute()
