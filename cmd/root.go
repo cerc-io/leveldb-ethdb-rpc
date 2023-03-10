@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 
-	leveldb_ethdb_rpc "github.com/vulcanize/leveldb-ethdb-rpc/pkg"
+	leveldb_ethdb_rpc "github.com/cerc-io/leveldb-ethdb-rpc/pkg"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
