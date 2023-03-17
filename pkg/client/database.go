@@ -186,9 +186,9 @@ func (d *DatabaseClient) AncientSize(kind string) (uint64, error) {
 
 // AncientRange retrieves all the items in a range, starting from the index 'start'.
 // It will return
-//  - at most 'count' items,
-//  - at least 1 item (even if exceeding the maxBytes), but will otherwise
-//   return as many items as fit into maxBytes.
+//   - at most 'count' items,
+//   - at least 1 item (even if exceeding the maxBytes), but will otherwise
+//     return as many items as fit into maxBytes.
 func (d *DatabaseClient) AncientRange(kind string, start, count, maxBytes uint64) ([][]byte, error) {
 	var resp [][]byte
 	err := d.client.Call(&resp, "leveldb_ancientRange", kind, start, count, maxBytes)
