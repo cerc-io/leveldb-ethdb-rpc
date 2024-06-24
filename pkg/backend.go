@@ -97,16 +97,12 @@ func (s *LevelDBBackend) ModifyAncients(f func(ethdb.AncientWriteOp) error) (int
 	return 0, errWriteNotAllowed
 }
 
-func (s *LevelDBBackend) TruncateAncients(n uint64) error {
-	return errWriteNotAllowed
+func (s *LevelDBBackend) TruncateHead(n uint64) (uint64, error) {
+	return 0, errWriteNotAllowed
 }
 
-func (s *LevelDBBackend) TruncateHead(n uint64) error {
-	return errWriteNotAllowed
-}
-
-func (s *LevelDBBackend) TruncateTail(n uint64) error {
-	return errWriteNotAllowed
+func (s *LevelDBBackend) TruncateTail(n uint64) (uint64, error) {
+	return 0, errWriteNotAllowed
 }
 
 func (s *LevelDBBackend) Sync() error {

@@ -212,14 +212,14 @@ func (d *DatabaseClient) ModifyAncients(f func(ethdb.AncientWriteOp) error) (int
 
 // TruncateHead satisfies the ethdb.AncientWriter interface.
 // TruncateHead discards all but the first n ancient data from the ancient store.
-func (d *DatabaseClient) TruncateHead(n uint64) error {
-	return errNotSupported
+func (d *DatabaseClient) TruncateHead(n uint64) (uint64, error) {
+	return 0, errNotSupported
 }
 
 // TruncateTail satisfies the ethdb.AncientWriter interface.
 // TruncateTail discards the first n ancient data from the ancient store.
-func (d *DatabaseClient) TruncateTail(n uint64) error {
-	return errNotSupported
+func (d *DatabaseClient) TruncateTail(n uint64) (uint64, error) {
+	return 0, errNotSupported
 }
 
 // Sync satisfies the ethdb.AncientWriter interface
